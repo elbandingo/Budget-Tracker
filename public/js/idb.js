@@ -21,6 +21,10 @@ request.onsuccess = function(e) {
 
     //if statement to determine if we are online, if so, upload new_tx
 
+    if(navigator.onLine) {
+        uploadTx();
+    }
+
 };
 
 //on error
@@ -29,7 +33,7 @@ request.onerror = function (e) {
 };
 
 //function for submitting a transaction, but no connection is established (offline)
-function saveTransaction(record) {
+function saveRecord(record) {
     //open a new_tx, and give it read and write permission
     const tx = db.transaction(['new_tx'], 'readwrite');
     const budgetTable = tx.objectStore('new_tx');

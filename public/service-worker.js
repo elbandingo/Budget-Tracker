@@ -34,13 +34,13 @@ self.addEventListener('install', function(e) {
 
 self.addEventListener('activate', function(e) {
     e.waitUntil(
-        caches.keys().then(function(key) {
-            let cacheKeep = key.filter(function(key) {
+        caches.keys().then(function(keyList) {
+            let cacheKeep = keyList.filter(function(key) {
                 return key.indexOf(APP_PREFIX);
             });
             cacheKeep.push(CACHE_NAME);
 
-            return Promise.all(key.map(function(key, i) {
+            return Promise.all(keyList.map(function(key, i) {
                 if(cacheKeep.indexOf(key) === -1) {
                     console.log('removing cache:' + key[i]);
                     return caches.delete(key[i]);
@@ -52,10 +52,10 @@ self.addEventListener('activate', function(e) {
 
 //add event listener for fetching function to respond with cache
 
-self.addEventListener('fetch', function(e) {
+self.addEventListener('fetch', function (e) {
     console.log('fetch: ' + e.request.url);
     e.respondWith(
-        caches.match(e.request).then(function(request) {
+        caches.match(e.request).then(function (request) {
             if(request) {
                 console.log('responding to request with cache: ' + e.request.url);
                 return request
