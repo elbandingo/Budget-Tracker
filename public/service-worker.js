@@ -49,3 +49,20 @@ self.addEventListener('activate', function(e) {
         })
     )
 });
+
+//add event listener for fetching function to respond with cache
+
+self.addEventListener('fetch', function(e) {
+    console.log('fetch: ' + e.request.url);
+    e.respondWith(
+        caches.match(e.request).then(function(request) {
+            if(request) {
+                console.log('responding to request with cache: ' + e.request.url);
+                return request
+            } else {
+                console.log('there is no cache found when fetching ' + e.request.url);
+                return fetch(e.request);
+            }
+        })
+    )
+});
