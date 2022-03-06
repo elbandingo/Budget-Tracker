@@ -36,3 +36,49 @@ function saveTransaction(record) {
     //add the record to the budget table
     budgetTable.add(record);
 }
+
+//function for uploading the transaction once back online
+
+function uploadTx() {
+    //open tx on your database
+    const tx = db.transaction(['new_tx'], 'readwrite');
+    //access the table (object store)
+    const budgetTable = tx.objectStore('new_tx');
+    //get all the records from the table, and set it to a variable
+    const getAllTx = budgetTable.getAll();
+
+    //on success of getting all records
+    getAllTx.onsuccess = function() {
+        //if there was data, send it to the API server
+        if(getAllTx.result.length > 0) {
+            fetch('/api/transaction', {
+                method: 'POST',
+                body: JSON.stringify(getAllTx.result),
+                headers: {
+                    Accept: 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(serverResponse => {
+                if(serverResponse.message) {
+                    throw new Error(serverResponse);
+                }
+
+                //open another transactions
+                const tx = db.transaction(['new_tx'], 'readwrite');
+                 //access the table (object store)
+                const budgetTable = tx.objectStore('new_tx');
+                //clear the items in the table/store
+                budgetTable.clear();
+                //alert the user that the offline transactions have been submitted
+                alert('All offline transactions have been submitted');
+            }).catch(err => {
+                console.log(err);
+            })
+        }
+    }
+}
+
+//listen for the application to come back online, when it does, run uploadTx function
+window.addEventListener('online', uploadTx);
